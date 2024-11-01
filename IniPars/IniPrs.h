@@ -16,7 +16,7 @@ class IniPrs
 	Entries entries;
 	Entry entr;
 	std::string buf_;
-	unsigned int str_counter{ 0 };
+	unsigned int str_counter;
 
 	char* loadTextFile(std::string fname);
 	bool isSpace(char* s);
@@ -32,11 +32,22 @@ class IniPrs
 	void makeEntries();
 	void makeSection(std::string group);
 	void makeGroup();
+	std::string get_string_value(const std::string& name_section, const std::string& name_value);
 public:
 	IniPrs(std::string flname);
-	template <typename T>
-	T get_value(std::string name_section, std::string name_value);
+	template<typename T>
+	T get_value(const std::string& name_section, const std::string& name_value)
+	{
+		static_assert(sizeof(T) == -1, "not implemented type for get_value");
+	}
+
 };
+
+template<>
+std::string IniPrs::get_value(const std::string& name_section, const std::string& name_value);
+
+template<>
+int IniPrs::get_value(const std::string& name_section, const std::string& name_value);
 
 class ValueException : std::exception
 {

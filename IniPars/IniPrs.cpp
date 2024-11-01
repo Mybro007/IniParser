@@ -1,4 +1,3 @@
-#pragma warning(disable:4244)
 #include "IniPrs.h"
 
 typedef std::pair <std::string, std::string> Entry;
@@ -25,17 +24,32 @@ char* IniPrs::loadTextFile(std::string fname)
 		long int size = fl.tellg();
 		fl.seekg(0, std::ios::beg);
 		char* buf = new char[size + 1];
-		for (int i = 0; i < size; i++)
+		char current;
+		int i = 0;
+		while(!fl.eof())
 		{
-			fl >> buf[i];
+			current = fl.get();
+			if (current == ';')
+			{
+				while (current != '\n')
+				{
+					current = fl.get();
+				}
+			}
+			if (current == 'ÿ')
+			{
+				break;
+			}
+			buf[i] = current;
+			i++;
 		}
-		buf[size] = '\0';
+		buf[i] = '\0';
 		return buf;
 	}
 
 bool IniPrs::isSpace(char* s)
 	{
-		return (*s == ' ' || *s == '\t' || *s == '\n');
+		return (*s == ' ' || *s == '\n');
 	}
 
 char* IniPrs::dropSpace(char* s)
@@ -44,10 +58,10 @@ char* IniPrs::dropSpace(char* s)
 		{
 			if (*s == ';')
 			{
-				while (*s != 0x0a && *s != '\0')
+				while (*s != '\n' && *s != '\0')
 					s++;
 			}
-			if (*s == 0x0a)
+			if (*s == '\n')
 				str_counter++;
 			if (*s == '\0')
 				return s;
@@ -86,7 +100,7 @@ char* IniPrs::getToken(char* s, std::string& token)
 		s = dropSpace(s);
 		char* start = s;
 		char c;
-		while ((isNumerous(s) || *s == '_' || *s == '.' || isAlpha(s)) && *s != '\0')
+		while ((isNumerous(s) || *s == '_' || isAlpha(s)) && *s != '\0')
 			s++;
 		if (*s != '\0')
 		{
@@ -105,29 +119,37 @@ char* IniPrs::getToken(char* s, std::string& token)
 char* IniPrs::getString(char* s, std::string& str)
 	{
 		s = dropSpace(s);
-		char c = *s;
-		s++;
 		char* start = s;
-		while (*s != '\0' && *s != c)
+		char c = *s;
+		while (*s != '\n' && *s!=';' && *s!='\0')
 		{
 			if (*s == 0x0a)
 			{
 				str_counter++;
 			}
 			s++;
+			while (*s == ' ')
+			{
+				s++;
+			}
 		}
+
 		if (*s != c)
 		{
+			c = *s;
 			*s = '\0';
 			str.append(start);
 			*s = c;
 		}
 		else
 		{
-			std::cout << "'" << c << "' missing\n";
+			std::cout << "(" << str_counter << ")" << "'" << c << "' missing\n";
 			exit(0);
 		}
-		s++;
+		if (*s != '\0')
+		{
+			s++;
+		}
 		return s;
 	}
 
@@ -167,9 +189,10 @@ void IniPrs::makeSection(std::string group)
 void IniPrs::makeGroup()
 	{
 		iniData.push_back(sectn);
+		entries.clear();
 	}
 
-IniPrs::IniPrs(std::string flname)
+IniPrs::IniPrs(std::string flname) : str_counter(0)
 	{
 		buf_ = loadTextFile(flname);
 		char* s;
@@ -204,12 +227,14 @@ IniPrs::IniPrs(std::string flname)
 				std::cout << str_counter + 1 << "Error: name or chapter expected\n";
 			}
 		}
+		makeSection(group);
+		makeGroup();
+		group.clear();
 	}
 
-template<typename T>
-T IniPrs::get_value(std::string name_section, std::string name_value)
+std::string IniPrs::get_string_value(const std::string& name_section, const std::string& name_value)
 	{
-		T answ = NULL;
+		std::string answ = "";
 		for (auto it = iniData.begin(); it != iniData.end(); ++it)
 		{
 			if (it->first == name_section)
@@ -223,7 +248,7 @@ T IniPrs::get_value(std::string name_section, std::string name_value)
 				}
 			}
 		}
-		if (answ != NULL)
+		if (!answ.empty())
 		{
 			return answ;
 		}
@@ -236,20 +261,33 @@ T IniPrs::get_value(std::string name_section, std::string name_value)
 			catch (const ValueException& ex)
 			{
 				std::cout << ex.what();
-				exit(0);
+				return " - 1";
 			}
 		}
 	}
 
+template<>
+std::string IniPrs::get_value(const std::string& name_section, const std::string& name_value)
+{
+	
+	return get_string_value(name_section, name_value);
+	
+}
 
-
+template<>
+int IniPrs::get_value(const std::string& name_section, const std::string& name_value)
+{
+	std::string str_value = get_string_value(name_section, name_value);
+	int answ = atoi(str_value.c_str());
+	return answ;
+}
 
 const char* FileException :: what() const noexcept  
 {
-	return "No such variables in this file.\n";
+	return "Can't open this .ini file.\n";
 }
 
 const char* ValueException :: what() const noexcept  
 {
-	return "Can't open this .ini file.\n";
+	return "No such variables in this file.\n";
 }
