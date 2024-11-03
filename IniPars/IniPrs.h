@@ -4,6 +4,7 @@
 #include <fstream>
 #include <list>
 
+
 typedef std::pair <std::string, std::string> Entry;
 typedef std::list <Entry> Entries;
 typedef std::pair <std::string, Entries> Section;
@@ -35,6 +36,7 @@ class IniPrs
 	std::string get_string_value(const std::string& name_section, const std::string& name_value);
 public:
 	IniPrs(std::string flname);
+	~IniPrs();
 	template<typename T>
 	T get_value(const std::string& name_section, const std::string& name_value)
 	{
@@ -48,6 +50,9 @@ std::string IniPrs::get_value(const std::string& name_section, const std::string
 
 template<>
 int IniPrs::get_value(const std::string& name_section, const std::string& name_value);
+
+template<>
+double IniPrs::get_value(const std::string& name_section, const std::string& name_value);
 
 class ValueException : std::exception
 {

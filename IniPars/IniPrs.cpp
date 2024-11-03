@@ -10,15 +10,7 @@ char* IniPrs::loadTextFile(std::string fname)
 		std::ifstream fl(fname);
 		if (!fl)
 		{
-			try
-			{
-				throw FileException();
-			}
-			catch (const FileException& ex)
-			{
-				std::cout << ex.what();
-				exit(0);
-			}
+			throw FileException();
 		}
 		fl.seekg(0, fl.end);
 		long int size = fl.tellg();
@@ -194,7 +186,15 @@ void IniPrs::makeGroup()
 
 IniPrs::IniPrs(std::string flname) : str_counter(0)
 	{
-		buf_ = loadTextFile(flname);
+		try
+		{
+			buf_ = loadTextFile(flname);
+		}
+		catch (const FileException& ex)
+		{
+			std::cout << ex.what();
+			exit(0);
+		}
 		char* s;
 		s = &buf_[0];
 		std::string name_vl;
@@ -231,6 +231,8 @@ IniPrs::IniPrs(std::string flname) : str_counter(0)
 		makeGroup();
 		group.clear();
 	}
+
+IniPrs::~IniPrs() = default;
 
 std::string IniPrs::get_string_value(const std::string& name_section, const std::string& name_value)
 	{
@@ -279,6 +281,14 @@ int IniPrs::get_value(const std::string& name_section, const std::string& name_v
 {
 	std::string str_value = get_string_value(name_section, name_value);
 	int answ = atoi(str_value.c_str());
+	return answ;
+}
+
+template<>
+double IniPrs::get_value(const std::string& name_section, const std::string& name_value)
+{
+	std::string str_value = get_string_value(name_section, name_value);
+	double answ = std::stod(str_value.c_str());
 	return answ;
 }
 
