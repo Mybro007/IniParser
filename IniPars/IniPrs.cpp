@@ -263,7 +263,7 @@ std::string IniPrs::get_string_value(const std::string& name_section, const std:
 			catch (const ValueException& ex)
 			{
 				std::cout << ex.what();
-				return " - 1";
+				return "-1";
 			}
 		}
 	}
@@ -279,17 +279,25 @@ std::string IniPrs::get_value(const std::string& name_section, const std::string
 template<>
 int IniPrs::get_value(const std::string& name_section, const std::string& name_value)
 {
-	std::string str_value = get_string_value(name_section, name_value);
-	int answ = atoi(str_value.c_str());
-	return answ;
+	if (get_string_value(name_section, name_value) != "- 1")
+	{
+		std::string str_value = get_string_value(name_section, name_value);
+		int answ = atoi(str_value.c_str());
+		return answ;
+	}
+	else return -1;
 }
 
 template<>
 double IniPrs::get_value(const std::string& name_section, const std::string& name_value)
 {
-	std::string str_value = get_string_value(name_section, name_value);
-	double answ = std::stod(str_value.c_str());
-	return answ;
+	if (get_string_value(name_section, name_value) != "-1")
+	{
+		std::string str_value = get_string_value(name_section, name_value);
+		double answ = std::stod(str_value.c_str());
+		return answ;
+	}
+	else return -1;
 }
 
 const char* FileException :: what() const noexcept  
