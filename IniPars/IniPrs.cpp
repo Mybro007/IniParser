@@ -186,15 +186,7 @@ void IniPrs::makeGroup()
 
 IniPrs::IniPrs(std::string flname) : str_counter(0)
 	{
-		try
-		{
-			buf_ = loadTextFile(flname);
-		}
-		catch (const FileException& ex)
-		{
-			std::cout << ex.what();
-			exit(0);
-		}
+		buf_ = loadTextFile(flname);
 		char* s;
 		s = &buf_[0];
 		std::string name_vl;
@@ -256,15 +248,7 @@ std::string IniPrs::get_string_value(const std::string& name_section, const std:
 		}
 		else
 		{
-			try
-			{
-				throw ValueException();
-			}
-			catch (const ValueException& ex)
-			{
-				std::cout << ex.what();
-				return "-1";
-			}
+			throw ValueException();
 		}
 	}
 
