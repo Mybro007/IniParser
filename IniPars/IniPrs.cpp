@@ -73,7 +73,7 @@ char* IniPrs::matchSymbol(char* s, char c)
 		else
 		{
 			std::cout << "(" << str_counter + 1 << ") " << "'" << c << "' is expected, but " << *s << "received\n";
-			exit(0);
+			throw SymbolException();
 		}
 	}
 
@@ -292,4 +292,9 @@ const char* FileException :: what() const noexcept
 const char* ValueException :: what() const noexcept  
 {
 	return "No such variables in this file.\n";
+}
+
+const char* SymbolException :: what() const noexcept
+{
+	return "Error\n";
 }

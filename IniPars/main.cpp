@@ -20,5 +20,10 @@ int main()
 		std::cout << ex.what();
 		return -1;
 	}
+	catch (const SymbolException& ex)
+	{
+		std::cout << ex.what();
+		return -1;
+	}
 	return 0;
 }

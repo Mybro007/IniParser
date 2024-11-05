@@ -65,3 +65,9 @@ class FileException : std::exception
 public:
 	const char* what() const noexcept override;
 };
+
+class SymbolException : std::exception
+{
+public:
+	const char* what() const noexcept override;
+};
